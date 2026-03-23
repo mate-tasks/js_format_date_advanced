@@ -8,22 +8,41 @@
  * @returns {string}
  */
 function formatDate(date, fromFormat, toFormat) {
-  const toDate = [];
-  const inFormat = {};
+  const SEPARATOR_INDEX = 3;
+  const fromSep = fromFormat[SEPARATOR_INDEX];
+  const toSep = toFormat[SEPARATOR_INDEX];
 
-  const [, , , fromSeparator] = fromFormat;
-  const [, , , toSeparator] = toFormat;
-  const dateArray = date.split(fromSeparator);
+  const parts = date.split(fromSep);
 
-  for (let i = 0; i < dateArray.length; i++) {
-    inFormat[fromFormat[i]] = dateArray[i];
+  const map = {};
+
+  for (let i = 0; i < SEPARATOR_INDEX; i++) {
+    map[fromFormat[i]] = parts[i];
   }
 
-  for (const item of toFormat) {
-    toDate.push(inFormat[item]);
+  let year = map['YYYY'];
+
+  if (!year && map['YY']) {
+    const yy = map['YY'];
+
+    year = Number(yy) < 30 ? '20' + yy : '19' + yy;
   }
 
-  return toDate.join(toSeparator);
+  const result = [];
+
+  for (let i = 0; i < SEPARATOR_INDEX; i++) {
+    const part = toFormat[i];
+
+    if (part === 'YYYY') {
+      result.push(year);
+    } else if (part === 'YY') {
+      result.push(year.slice(-2));
+    } else {
+      result.push(map[part]);
+    }
+  }
+
+  return result.join(toSep);
 }
 
 module.exports = formatDate;
